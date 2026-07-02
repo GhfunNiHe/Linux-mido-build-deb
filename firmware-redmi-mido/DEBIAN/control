@@ -1,0 +1,10 @@
+Package: firmware-redmi-mido
+Version: 1.0
+Architecture: arm64
+Maintainer: msm8953-mainline
+Conflicts: linux-firmware
+Replaces: linux-firmware
+Description: Firmware blobs for Xiaomi Redmi Note 4X (mido)
+ Proprietary firmware files for Qualcomm MSM8953 platform on
+ Xiaomi Redmi Note 4X (mido), including ADSP, modem, WLAN,
+ and Venus video codec firmware.

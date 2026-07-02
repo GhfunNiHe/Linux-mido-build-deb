@@ -1,0 +1,6 @@
+Package: alsa-redmi-mido
+Version: 1.0
+Architecture: arm64
+Maintainer: msm8953-mainline
+Depends: alsa-ucm-conf
+Description: Alsa Use Case Configuration for Xiaomi Redmi Note 4X (mido)
