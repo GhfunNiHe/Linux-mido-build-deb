@@ -1,0 +1,44 @@
+name: Build Kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_version:
+        description: '内核版本 (如 7.0.9-r0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld ccache fakeroot dpkg-dev \
+            gcc-arm-none-eabi libnewlib-arm-none-eabi \
+            zstd flex bison bc
+
+      - name: Setup ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: mido-${{ inputs.kernel_version }}-${{ hashFiles('config-msm8953-*.aarch64') }}
+          restore-keys: |
+            mido-${{ inputs.kernel_version }}-
+            mido-
+
+      - name: Build
+        run: bash mido-kernel-build.sh ${{ inputs.kernel_version }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mido-kernel-${{ inputs.kernel_version }}
+          path: |
+            *.deb
+            *.img
+            !*-dbg*.deb
