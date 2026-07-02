@@ -4,13 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       kernel_version:
-        description: '内核版本 (如 7.0.9-r0)'
+        description: '内核版本'
         required: true
-        type: string
+        type: choice
+        options:
+          - 6.17.7-r0
+          - 6.19.5-r0
+          - 7.0.2-r0
+          - 7.0.9-r0
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,15 +23,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang lld ccache fakeroot dpkg-dev \
+          sudo apt-get install -y clang lld llvm ccache fakeroot dpkg-dev \
             gcc-arm-none-eabi libnewlib-arm-none-eabi \
-            zstd flex bison bc
+            zstd flex bison bc debhelper
 
       - name: Setup ccache
         uses: actions/cache@v4
         with:
           path: ~/.ccache
-          key: mido-${{ inputs.kernel_version }}-${{ hashFiles('config-msm8953-*.aarch64') }}
+          key: mido-${{ inputs.kernel_version }}-${{ hashFiles(format('config/config-msm8953-{0}.aarch64', inputs.kernel_version)) }}
           restore-keys: |
             mido-${{ inputs.kernel_version }}-
             mido-

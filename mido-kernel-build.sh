@@ -32,7 +32,7 @@ export LLVM=1
 # ==========================================
 # 3. 内核配置文件
 # ==========================================
-KCONFIG="${SCRIPT_DIR}/config-msm8953-${KERNEL_VERSION}.aarch64"
+KCONFIG="${SCRIPT_DIR}/config/config-msm8953-${KERNEL_VERSION}.aarch64"
 if [ ! -f "${KCONFIG}" ]; then
     echo "❌ 未找到内核配置文件: ${KCONFIG}"
     exit 1
