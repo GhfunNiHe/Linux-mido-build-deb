@@ -43,7 +43,7 @@ echo "📋 内核配置: ${KCONFIG}"
 # 4. 拉取内核源码
 # ==========================================
 echo "📥 克隆内核源码 (标签: ${KERNEL_TAG})..."
-# git clone https://github.com/msm8953-mainline/linux.git --branch "${KERNEL_TAG}" --depth 1 "${SCRIPT_DIR}/linux"
+git clone https://github.com/msm8953-mainline/linux.git --branch "${KERNEL_TAG}" --depth 1 "${SCRIPT_DIR}/linux"
 cd "${SCRIPT_DIR}/linux"
 
 # ==========================================
@@ -55,25 +55,19 @@ make ARCH=arm64 olddefconfig
 echo "✅ 配置补全完成"
 
 # ==========================================
-# 6. 编译
+# 6. 编译 & 生成 deb 包
 # ==========================================
-echo "🔨 开始编译内核..."
-make -j"$(nproc)" ARCH=arm64
+# linux 6.12 起需要 libssl-dev:arm64 构建 kernel-headers，通过
+# DEB_BUILD_PROFILES=nokernelheaders 跳过 headers 规避（ref: e2c3182）
+# DPKG_FLAGS=-d 跳过构建依赖检查，兼容非 Debian 发行版（Arch/CachyOS 等）
 _kernel_version="$(make kernelrelease -s)"
-echo "📌 内核版本: ${_kernel_version}"
-
-# ==========================================
-# 7. 生成 deb 包
-# ==========================================
-echo "📦 生成 deb 包..."
-# make DEB_BUILD_PROFILES=pkg.linux-upstream.nokernelheaders bindeb-pkg
-# 使用 dpkg-buildpackage -d 兼容非 Debian 发行版
-dpkg-buildpackage -d -b --no-pre-clean --unsigned-changes -j"$(nproc)" -aarm64
+echo "📦 编译并生成 deb 包..."
+make -j"$(nproc)" CC="ccache clang" LLVM=1 DEB_BUILD_PROFILES=pkg.linux-upstream.nokernelheaders DPKG_FLAGS="-d" bindeb-pkg
 
 cd "${SCRIPT_DIR}"
 
 # ==========================================
-# 8. 编译 lk2nd
+# 7. 编译 lk2nd
 # ==========================================
 
 echo "📥 克隆 lk2nd 源码..."
@@ -96,7 +90,7 @@ echo "✅ lk2nd-goodix.img"
 cd "${SCRIPT_DIR}"
 
 # ==========================================
-# 9. 打包固件
+# 8. 打包固件
 # ==========================================
 echo "📦 打包固件..."
 dpkg-deb --build --root-owner-group -Zzstd -z10 "${SCRIPT_DIR}/firmware-redmi-mido"
